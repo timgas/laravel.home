@@ -8,6 +8,7 @@ use App\Http\Resources\OrganizationResource;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\Vacancy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,23 +26,10 @@ class OrganizationController extends Controller
         $this->authorizeResource(Organization::class);
     }
 
-    private function findCountId($obj) {
-        $arr = [];
-        if (count($obj) > 1) {
-            foreach ($obj as $item) {
-                $arr[]= $item;
-            }
-            ($arr);
-        } else {
-            $arr[] = $obj;
-            dd($arr);
-        }
-    }
-
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|JsonResponse
+     * @return Builder[]|Collection|JsonResponse
      */
     public function index()
     {
@@ -95,7 +83,7 @@ class OrganizationController extends Controller
                 case 1 :
                     //status: active
                     $response = $organization->toArray() +
-                        ['creator' => $organization->creator()->get()] +
+                        ['creator' => $organization->user()->get()] +
                         ['vacancies' => $organization->vacancies()
                             ->where('status', 'active')
                             ->get()];
@@ -106,7 +94,7 @@ class OrganizationController extends Controller
                 case 2 :
                     //status: closed
                     $response = $organization->toArray() +
-                        ['creator' => $organization->creator()->get()] +
+                        ['creator' => $organization->user()->get()] +
                         ['vacancies' => $organization->vacancies()
                             ->where('status', 'closed')
                             ->get()];
@@ -117,7 +105,7 @@ class OrganizationController extends Controller
                 case 3 :
                     //status: active closed
                     $response = $organization->toArray() +
-                        ['creator' => $organization->creator()->get()] +
+                        ['creator' => $organization->user()->get()] +
                         ['vacancies' => $organization->vacancies()
                             ->get()];
                     if ($request->boolean('workers')) {
@@ -127,7 +115,7 @@ class OrganizationController extends Controller
                 default :
                     // all organization vacancies
                     $response = $organization->toArray() +
-                        ['creator' => $organization->creator()->get()];
+                        ['creator' => $organization->user()->get()];
                     if ($request->boolean('workers')) {
                         return $response + relationsWorkers($organization);
                     }
